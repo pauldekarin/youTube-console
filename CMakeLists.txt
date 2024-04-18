@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.9)
+project(youtube-console)
+set(CMAKE_CXX_STANDARD 11)
+find_package(OpenCV REQUIRED)
+include_directories(${OpenCV_INCLUDE_DIRS})
+add_executable(${CMAKE_PROJECT_NAME} main.cpp)
+target_link_libraries(${CMAKE_PROJECT_NAME} ${OpenCV_LIBS})

@@ -1,0 +1,3 @@
+/Users/bimba/Desktop/youtube-console/build/CMakeFiles/youtube-console.dir
+/Users/bimba/Desktop/youtube-console/build/CMakeFiles/edit_cache.dir
+/Users/bimba/Desktop/youtube-console/build/CMakeFiles/rebuild_cache.dir
