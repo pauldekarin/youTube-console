@@ -8,12 +8,13 @@ from numpy import clip
 from signal import signal, SIGWINCH, raise_signal
 from typing import Callable
 import argparse
-
+import keyboard
 parser = argparse.ArgumentParser(
     prog="Youtube Console",
     description="Watch Video From Youtube On Console"
 )
-parser.add_argument('--link')
+parser.add_argument('--link',default="https://www.youtube.com/watch?v=YGZLvKAFeYI")
+parser.add_argument("--symbol", default=chr(9608))
 import queue
 
 #somewhere accessible to both:
@@ -107,11 +108,6 @@ class Screen:
     def show_cursor(self)->None: print("\e[?25h")
     def clear(self)->None: 
         os.write(sys.stdout.fileno(),b"\033c")
-        # if threading.current_thread().__class__.__name__ == '_MainThread':
-        #     print("\033c", end="", flush=True)
-        # else:
-        #     from_dummy_thread(self.clear)
-        #     from_main_thread_blocking
        
     def resize_handler(self,signum:int, frame)->None:
         self.size.apply(os.get_terminal_size())
@@ -139,7 +135,7 @@ class Stream:
     def start(self)->None:
         if self.handler is not None:
             self.handler.start()
-            print(self.receiver)
+            
             while True:
                 if self.receiver is not None:
                     if not self.receiver(self.handler.read()):
@@ -160,12 +156,13 @@ class Stream:
             return False
         return True
 
+
 class App:
     def __init__(self)->None:
         self.screen : Screen = Screen()
         self.stream : Stream= Stream(receiver=self.parser)
-        self.stack : list = list()
-
+    def set_symbol(self, symb):
+        self.symbol = symb
     def parser(self, frame : cv2.Mat)->bool:
         if frame is not None:
             width, height, _ = frame.shape
@@ -182,23 +179,24 @@ class App:
                                 g = frame[j][i][1],
                                 b = frame[j][i][2]
                             )
-                    line += "\033[38;2;{r};{g};{b}m{symbol}\033[0m".format(r = color.r, g = color.g, b = color.b,symbol=chr(9608))
+                    line += "\033[38;2;{r};{g};{b}m{symbol}\033[0m".format(r = color.r, g = color.g, b = color.b,symbol=self.symbol)
                 line += "\n"
-            
+            self.screen.clear()
             print(line, end="")
-   
-        if cv2.waitKey(5) == ord("q"):
-            return False
+       
+       
         return True
     
     def execute(self):
         self.stream.start()
+    
     
 
 if __name__ == "__main__":
     args = parser.parse_args()
     app = App()
     app.stream.open(args.link)
+    app.set_symbol(args.symbol)
     sys.exit(app.execute())
 
 
